@@ -146,6 +146,8 @@ if (AUTO_VERIFY.enabled && (isLocal || !AUTO_VERIFY.onlyLocal)) {
 // Cloud backends: keep this Run open until the player's Verify job has finished (see cloudJobDone above).
 // Local simulators finish here as before.
 if (!isLocal) {
-  if (jobsThisRun === 0) backendLine.textContent += ' — this Run stays open until you press Verify on a result (Details); one job per Run.';
+  const waitingForPlayer = jobsThisRun === 0;
+  if (waitingForPlayer) backendLine.textContent += ' — this Run stays open until you press Verify on a result (Details); one job per Run.';
   await cloudJobDone;
+  if (waitingForPlayer) backendLine.textContent = `Backend: ${backendName} — this Run's job has finished (one job per Run). Press Run again to verify another dispatch.`;
 }

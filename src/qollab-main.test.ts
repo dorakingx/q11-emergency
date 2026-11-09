@@ -126,6 +126,7 @@ describe('qollab/main.js run lifecycle', () => {
 
     await loaded;
     expect(run.done).toBe(true);
+    expect(backendLine.textContent).toContain("this Run's job has finished");
     // The verification line is logged before the run finishes (Qollab prints Done. at that point).
     expect(logs.indexOf(line ?? '')).toBeLessThan(logs.indexOf('Done.'));
   });
