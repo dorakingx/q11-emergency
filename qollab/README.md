@@ -15,7 +15,8 @@ stabilizer (parity) checks, fire crews are Pauli corrections. Built for the Qoll
    On any surface-code result, **Details → Verify on this backend (100 shots)** runs *your* dispatch as a Qiskit circuit.
 
 IonQ's free noise-model simulators (Aria 1/2, Forte 1/Enterprise) work too, one job per run; counts deviate statistically
-and the page labels them as such. No hardware (QPU) runs are made or claimed.
+and the page labels them as such. On IonQ there is no self-test: the Run stays open (console on *Running…*) until you press
+**Verify on ionq_simulator** on a result, and finishes (*Done.*) once that job's result is shown. No hardware (QPU) runs are made or claimed.
 
 ## What is in this project
 - `index.html`, `main.js`, `main.css`, `game/q11-game.js` — the game (JS/Qiskit project page; `main.js` bridges to Python).

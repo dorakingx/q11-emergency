@@ -38,6 +38,13 @@ backendLine.textContent = `Backend selected in the Run dialog: ${backendName}`;
 const isLocal = /basic|aer|braket|local|fake/i.test(backendName) && !/ionq/i.test(backendName);
 let jobsThisRun = 0;
 const recorded = [];
+// A Qollab run ends when the top level of main.js finishes, and IonQ refuses requests made after that. On cloud
+// backends the top level therefore waits on this promise (last line), which bridge.run resolves once the Run's
+// one job has been sent and handled — Qollab docs, JS / Qiskit projects, "Waiting for user input".
+let releaseRun;
+const cloudJobDone = new Promise((resolve) => {
+  releaseRun = resolve;
+});
 
 const bridge = {
   kind: 'qollab',
@@ -56,6 +63,9 @@ const bridge = {
       return { status: 'error', message: 'Qollab allows one IonQ job per Run. Press Stop, then Run again to verify another mission.' };
     }
     const startedAt = new Date().toISOString();
+    // Take the Run's job before the first await, so two quick calls cannot both pass the guard above.
+    jobsThisRun += 1;
+    let sent = false;
     try {
       const qc = await circuits.build_mission_circuit.callPromisingKwargs({
         mission_id: request.missionId,
@@ -63,7 +73,7 @@ const bridge = {
         prep: request.prep ?? '0',
         readout_basis: request.readoutBasis ?? 'Z',
       });
-      jobsThisRun += 1;
+      sent = true;
       const job = await backend.run(qc, { shots: request.shots });
       let jobId = null;
       try { jobId = String(typeof job.job_id === 'function' ? job.job_id() : job.job_id); } catch { jobId = null; }
@@ -102,6 +112,11 @@ const bridge = {
     } catch (err) {
       console.log('Q11 verification failed: ' + (err && err.message ? err.message : String(err)));
       return { status: 'error', message: err && err.message ? err.message : String(err) };
+    } finally {
+      // Nothing reached the backend (the circuit failed to build): give the job back so the player can retry.
+      if (!sent) jobsThisRun -= 1;
+      // The cloud job was sent and handled (results logged above, or the error returned): let the run finish.
+      if (!isLocal && jobsThisRun >= 1) releaseRun();
     }
   },
 };
@@ -126,4 +141,11 @@ if (AUTO_VERIFY.enabled && (isLocal || !AUTO_VERIFY.onlyLocal)) {
   } else {
     backendLine.textContent = `Backend: ${backendName} — self-test failed: ${r.message}`;
   }
+}
+
+// Cloud backends: keep this Run open until the player's Verify job has finished (see cloudJobDone above).
+// Local simulators finish here as before.
+if (!isLocal) {
+  if (jobsThisRun === 0) backendLine.textContent += ' — this Run stays open until you press Verify on a result (Details); one job per Run.';
+  await cloudJobDone;
 }
