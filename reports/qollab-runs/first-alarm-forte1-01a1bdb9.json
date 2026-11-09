@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "source": "live-cloud",
+  "backendName": "IonQ Forte 1 simulator (29q) \u2014 ionq_simulator (noise model, free)",
+  "platform": "qollab.xyz draft of q11-emergency (game/q11-game.js sha256 923c54b3\u2026, commit 4def0b8)",
+  "trigger": "in-game Verify button (Rowhouse Lane, X crew on house 1, Spray, Details)",
+  "missionId": "first-alarm",
+  "correction": "IXI",
+  "prep": "0",
+  "readoutBasis": "Z",
+  "shots": 100,
+  "jobId": "01a1bdb9-a3a8-7108-bc96-a0b290c647c0",
+  "finishedAt": "2026-11-09T00:33Z",
+  "consoleRunTime": "1m 9s",
+  "counts": {
+    "00011": 100
+  },
+  "analysis": {
+    "dominantAlarmPattern": "11",
+    "predictedAlarmPattern": "11",
+    "predictedSyndromeShare": 1.0,
+    "predictedLogicalShare": 1.0,
+    "dominantMatches": {
+      "syndrome": true,
+      "logical": true,
+      "dataChecks": true
+    },
+    "exactMatchesIdealModel": true,
+    "verdict": "success"
+  },
+  "lifecycle": "Running... until the job finished; 'Q11 verification {...}' logged, then Done.; one result card; second Verify disabled ('No job left in this run')",
+  "note": "counts transcribed from the result card and console; 100/100 in the predicted pattern, no noise visible in this 5-qubit run"
+}
