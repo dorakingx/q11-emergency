@@ -745,7 +745,10 @@ export function CloudPanel({ bridge, missionId, correction }: { readonly bridge:
   const t = useT();
   const [live, setLive] = useState<CloudState>({ kind: 'idle' });
   const allForMission = bridge.cached(missionId);
-  const cached = filterByDispatch(bridge.cached(missionId, correction), missionId, correction);
+  // The Qollab bridge also records the result it just returned, so the live card must not appear a second time
+  // as a recorded one.
+  const liveOk = live.kind === 'done' && live.result.status === 'ok' ? live.result : null;
+  const cached = filterByDispatch(bridge.cached(missionId, correction), missionId, correction).filter((r) => liveOk === null || !sameRun(r, liveOk));
   const otherDispatches = Array.from(new Set(allForMission.map((r) => r.correction))).filter((c) => !cached.some((r) => r.correction === c));
   const canRun = bridge.kind === 'qollab' && typeof bridge.run === 'function';
   const remaining = bridge.jobsRemaining?.() ?? 0;
@@ -789,6 +792,10 @@ export function CloudPanel({ bridge, missionId, correction }: { readonly bridge:
       ) : null}
     </section>
   );
+}
+
+function sameRun(a: CloudResultOk, b: CloudResultOk): boolean {
+  return a === b || (a.backendName === b.backendName && a.jobId === b.jobId && a.startedAt === b.startedAt);
 }
 
 function CloudResultCard({ result }: { readonly result: CloudResultOk }) {
